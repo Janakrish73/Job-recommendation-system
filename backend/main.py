@@ -6,14 +6,20 @@ import os
 from database import engine, Base
 from routers import auth, users, jobs, recommendations, upload
 
-Base.metadata.create_all(bind=engine)
-
 
 app = FastAPI(
     title="Smart Job Recommendation System",
     description="AI-powered job recommendations based on skill gap analysis",
     version="1.0.0"
 )
+
+app.on_event("startup")
+def startup_event():
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("Database connected successfully")
+    except Exception as e:
+        print("Database connection failed:", e)
 
 
 app.add_middleware(
@@ -32,6 +38,8 @@ app.include_router(users.router)
 app.include_router(jobs.router)
 app.include_router(recommendations.router)
 app.include_router(upload.router)
+
+
 
 
 @app.get("/")
